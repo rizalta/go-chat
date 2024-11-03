@@ -1,73 +1,18 @@
-# Simple Makefile for a Go project
+live/templ:
+	@templ generate --watch --proxy="http://localhost:8080" --open-browser=false -v
 
-# Build the application
-all: build
-templ-install:
-	@if ! command -v templ > /dev/null; then \
-		read -p "Go's 'templ' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
-		if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
-			go install github.com/a-h/templ/cmd/templ@latest; \
-			if [ ! -x "$$(command -v templ)" ]; then \
-				echo "templ installation failed. Exiting..."; \
-				exit 1; \
-			fi; \
-		else \
-			echo "You chose not to install templ. Exiting..."; \
-			exit 1; \
-		fi; \
-	fi
-tailwind:
-	@if [ ! -f tailwindcss ]; then curl -sL https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 -o tailwindcss; fi
-	
-	@chmod +x tailwindcss
+live/server:
+	@air \
+	--build.cmd "go build -o bin/go-chat cmd/api/main.go" --build.bin "bin/go-chat" --build.delay "100" \
+	--build.exclude_dir "node_modules" \
+	--build.include_ext "go,templ" \
+	--build.stop_on_error "false" \
+	--misc.clean_on_exit true
 
-build: tailwind templ-install
-	@echo "Building..."
-	@templ generate
-	@./tailwindcss -i cmd/web/assets/css/input.css -o cmd/web/assets/css/output.css
-	@go build -o bin/go-chat cmd/api/main.go
+live/tailwind:
+	@./tailwindcss -i cmd/web/assets/css/input.css -o cmd/web/assets/css/output.css --watch --minify
 
-# Run the application
-run:
-	@go run cmd/api/main.go
-# Create DB container
-docker-run:
-	@if docker compose up 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose up; \
-	fi
+live: 
+	make -j4 live/tailwind live/templ live/server
 
-# Shutdown DB container
-docker-down:
-	@if docker compose down 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
-	fi
-
-# Clean the binary
-clean:
-	@echo "Cleaning..."
-	@rm -f main
-
-# Live Reload
-watch:
-	@if command -v air > /dev/null; then \
-            air; \
-            echo "Watching...";\
-        else \
-            read -p "Go's 'air' is not installed on your machine. Do you want to install it? [Y/n] " choice; \
-            if [ "$$choice" != "n" ] && [ "$$choice" != "N" ]; then \
-                go install github.com/air-verse/air@latest; \
-                air; \
-                echo "Watching...";\
-            else \
-                echo "You chose not to install air. Exiting..."; \
-                exit 1; \
-            fi; \
-        fi
-
-.PHONY: all build run clean watch tailwind docker-run docker-down templ-install
+.PHONY: live live/tailwind live/server live/templ
