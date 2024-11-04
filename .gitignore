@@ -35,3 +35,6 @@ tmux.sh
 # tailwind and js
 tailwindcss
 node_modules/
+
+# templ watch files
+*_templ.txt
