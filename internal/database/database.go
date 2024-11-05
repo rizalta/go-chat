@@ -1,9 +1,7 @@
 package database
 
 import (
-	"context"
 	"fmt"
-	"go-chat/internal/domain"
 	"log"
 	"os"
 	"strconv"
@@ -12,16 +10,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Service interface {
-	AddUser(ctx context.Context, arg AddUserParams) (domain.User, error)
-	GetUserByID(ctx context.Context, id string) (domain.User, error)
-	Close()
-}
-
-type service struct {
-	db *redis.Client
-}
-
 var (
 	address  = os.Getenv("DB_ADDRESS")
 	port     = os.Getenv("DB_PORT")
@@ -29,7 +17,7 @@ var (
 	database = os.Getenv("DB_DATABASE")
 )
 
-func New() Service {
+func New() *redis.Client {
 	num, err := strconv.Atoi(database)
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("database incorrect %v", err))
@@ -42,11 +30,6 @@ func New() Service {
 		Password: password,
 		DB:       num,
 	})
-	s := &service{db: rdb}
 
-	return s
-}
-
-func (s *service) Close() {
-	s.db.Close()
+	return rdb
 }

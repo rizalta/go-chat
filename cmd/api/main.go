@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"go-chat/internal/database"
 	"go-chat/internal/server"
 )
 
 func main() {
-	server := server.NewServer()
+	db := database.New()
+	defer db.Close()
+	server := server.NewServer(db)
 
 	err := server.ListenAndServe()
 	if err != nil {

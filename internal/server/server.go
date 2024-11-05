@@ -8,22 +8,21 @@ import (
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"go-chat/internal/database"
+	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
 	port int
 
-	db database.Service
+	db *redis.Client
 }
 
-func NewServer() *http.Server {
+func NewServer(db *redis.Client) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
 
-		db: database.New(),
+		db: db,
 	}
 
 	// Declare Server config
