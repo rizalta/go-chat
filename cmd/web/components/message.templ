@@ -1,0 +1,8 @@
+package components
+
+templ Message(msg string, username string) {
+<div id="chat_room" hx-swap-oob="beforeend">
+	<p>{ msg }</p>
+	<p>{ username }</p>
+</div>
+}

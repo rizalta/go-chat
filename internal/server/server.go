@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"go-chat/internal/ws"
 	"net/http"
 	"os"
 	"strconv"
@@ -13,14 +14,16 @@ import (
 
 type Server struct {
 	port int
+	hub  *ws.Hub
 
 	db *redis.Client
 }
 
-func NewServer(db *redis.Client) *http.Server {
+func NewServer(db *redis.Client, hub *ws.Hub) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
+		hub:  hub,
 
 		db: db,
 	}

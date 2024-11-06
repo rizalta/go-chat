@@ -1,19 +1,11 @@
 package pages
 
+import "go-chat/cmd/web/components"
+
 templ Index() {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>Go-chat</title>
-			<link href="/assets/css/output.css" rel="stylesheet"/>
-		</head>
-		<body>
-			<main>
-				<button type="button" class="btn bg-yellow-100 btn-lg">buddy</button>
-				<button type="button" class="btn btn-outline">Test</button>
-			</main>
-		</body>
-	</html>
+	@Base() {
+		<main>
+			@components.Navbar()
+		</main>
+	}
 }

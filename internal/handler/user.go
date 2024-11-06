@@ -87,6 +87,16 @@ func (h *UserHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Redirect", "/login")
 }
 
+func (h *UserHandler) Signout(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:    "session",
+		Path:    "/",
+		Expires: time.Unix(0, 0),
+	}
+	http.SetCookie(w, cookie)
+	w.Header().Set("HX-Redirect", "/login")
+}
+
 func sendErroNotification(ctx context.Context, w http.ResponseWriter, msg string) {
 	components.ErrorNotification(msg).Render(ctx, w)
 }

@@ -17,6 +17,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Use(middlewares.AuthMiddleware)
 
 	userHandler := handler.NewUserHandler(s.db)
+	wsHandler := handler.NewWSHandler(s.hub)
 
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
@@ -38,6 +39,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	r.Post("/login", userHandler.Login)
 	r.Post("/signup", userHandler.Signup)
+	r.Get("/signout", userHandler.Signout)
+
+	r.Get("/ws", wsHandler.HandleWS)
 
 	return r
 }
