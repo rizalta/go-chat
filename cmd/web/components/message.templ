@@ -1,8 +1,16 @@
 package components
 
-templ Message(msg string, username string) {
-<div id="chat_room" hx-swap-oob="beforeend">
-	<p>{ msg }</p>
-	<p>{ username }</p>
-</div>
+import "fmt"
+
+templ Message(content string, username string, timestamp string) {
+	<div id="room" hx-swap-oob="afterbegin">
+		<div class="chat chat-start" x-data={ fmt.Sprintf("chat('%s')", timestamp) } x-init="updateTimeAgo()">
+			<div class="chat-header">
+				{ username }
+				<time class="text-xs opacity-50" x-text="timeAgo"></time>
+				<span x-text="givenTime"></span>
+			</div>
+			<div class="chat-bubble">{ content }</div>
+		</div>
+	</div>
 }

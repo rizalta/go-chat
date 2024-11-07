@@ -76,7 +76,8 @@ func (c *Client) WritePump() {
 		fmt.Println(msg)
 
 		var buf bytes.Buffer
-		components.Message(msg.Username, msg.Content).Render(context.Background(), &buf)
+		components.Message(msg.Content, msg.Username, msg.TimeStamp.Format(time.RFC3339)).
+			Render(context.Background(), &buf)
 		err := c.conn.WriteMessage(websocket.TextMessage, buf.Bytes())
 		if err != nil {
 			return

@@ -10,7 +10,7 @@ server:
 	--misc.clean_on_exit true
 
 tailwind:
-	@./tailwindcss -i cmd/web/assets/css/input.css -o cmd/web/assets/css/output.css --watch --minify
+	@./tailwindcss -i cmd/web/assets/css/input.css -o cmd/web/assets/css/output.css --watch
 
 sync_assets:
 	@air \

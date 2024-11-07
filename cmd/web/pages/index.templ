@@ -6,10 +6,10 @@ templ Index() {
 	@Base() {
 		<main class="flex flex-col justify-start items-center w-full h-full">
 			@components.Navbar()
-			<div class="w-3/5 h-5/6 bg-base-200 mt-6 flex flex-col items-center">
-				<h1 class="text-2xl">Chatroom</h1>
-				<div class="w-11/12 h-5/6 border border-primary"></div>
-				<form class="w-11/12 flex gap-1">
+			<div hx-ext="ws" ws-connect="/ws" class="w-3/5 h-5/6 bg-base-200 mt-6 flex flex-col items-center rounded-md">
+				<h1 class="text-3xl mt-3 mb-2">Chatroom</h1>
+				<div id="room" class="w-11/12 h-5/6 border-2 border-primary overflow-scroll flex flex-col-reverse rounded-md mb-2"></div>
+				<form ws-send class="w-11/12 flex gap-2">
 					<input
 						type="text"
 						name="message"
@@ -20,5 +20,28 @@ templ Index() {
 				</form>
 			</div>
 		</main>
+		<script>
+	document.addEventListener("alpine:init", () => {
+		Alpine.data("chat", (timestamp) => ({
+			givenTime: new Date(timestamp),
+			timeAgo: "",
+			updateTimeAgo() {
+				setInterval(() => {
+					const now = new Date();
+					const diffInSeconds = Math.floor((now - this.givenTime) / 1000);
+					if (diffInSeconds < 60) {
+						this.timeAgo = "just now";
+					} else if (diffInSeconds < 3600) {
+						this.timeAgo = `${Math.floor(diffInSeconds / 60)} minutes ago`;
+					} else if (diffInSeconds < 86400) {
+						this.timeAgo = `${Math.floor(diffInSeconds / 3600)} hours ago`;
+					} else {
+						this.timeAgo = `${Math.floor(diffInSeconds / 86400)} days ago`;
+					}
+				}, 1000);
+			},
+		}))
+	})
+</script>
 	}
 }
