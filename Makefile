@@ -3,7 +3,7 @@ templ:
 
 server:
 	@air \
-	--build.cmd "go build -o ./tmp/go-chat ./cmd/api/main.go" --build.bin "./tmp/go-chat" --build.delay "100" \
+	--build.cmd "go build -o ./tmp/go-chat ./cmd/api/main.go" --build.bin "./tmp/go-chat" --build.delay "1000" \
 	--build.exclude_dir "node_modules" \
 	--build.include_ext "go,templ" \
 	--build.stop_on_error "false" \

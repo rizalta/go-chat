@@ -41,7 +41,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID)
+	token, err := utils.GenerateToken(user.ID, user.Username)
 	if err != nil {
 		sendErroNotification(r.Context(), w, "Something went wrong")
 		return

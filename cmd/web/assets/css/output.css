@@ -829,12 +829,6 @@ html {
   line-height: 1.25rem;
 }
 
-.chat-footer {
-  grid-row-start: 3;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
 .chat-bubble {
   position: relative;
   display: block;
@@ -903,10 +897,6 @@ html {
 }
 
 .chat-end .chat-header {
-  grid-column-start: 1;
-}
-
-.chat-end .chat-footer {
   grid-column-start: 1;
 }
 

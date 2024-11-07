@@ -13,6 +13,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			claims, err := utils.ParseToken(cookie.Value)
 			if err == nil {
 				ctx := context.WithValue(r.Context(), "userID", claims.UserID)
+				ctx = context.WithValue(ctx, "username", claims.Username)
 				r = r.WithContext(ctx)
 			}
 		}

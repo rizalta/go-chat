@@ -12,20 +12,29 @@ import (
 )
 
 type Client struct {
-	userID string
-	conn   *websocket.Conn
-	hub    *Hub
-	send   chan Message
+	userID   string
+	username string
+	conn     *websocket.Conn
+	hub      *Hub
+	send     chan Message
 }
 
-func NewClient(userID string, conn *websocket.Conn, hub *Hub) *Client {
+type ClientOption struct {
+	UserID   string
+	Username string
+	Conn     *websocket.Conn
+	Hub      *Hub
+}
+
+func NewClient(opts ClientOption) *Client {
 	c := &Client{
-		userID: userID,
-		conn:   conn,
-		hub:    hub,
-		send:   make(chan Message),
+		userID:   opts.UserID,
+		username: opts.Username,
+		conn:     opts.Conn,
+		hub:      opts.Hub,
+		send:     make(chan Message),
 	}
-	hub.register <- c
+	opts.Hub.register <- c
 
 	return c
 }
@@ -56,7 +65,7 @@ func (c *Client) ReadPump() {
 		}
 		c.hub.broadcast <- Message{
 			UserID:    c.userID,
-			Username:  c.userID[:7],
+			Username:  c.username,
 			Content:   msg.Message,
 			TimeStamp: time.Now(),
 		}

@@ -9,15 +9,17 @@ import (
 )
 
 type UserClaims struct {
-	UserID string
+	UserID   string
+	Username string
 	jwt.RegisteredClaims
 }
 
 var secretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
-func GenerateToken(userID string) (string, error) {
+func GenerateToken(userID, username string) (string, error) {
 	claims := UserClaims{
-		UserID: userID,
+		UserID:   userID,
+		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * 24 * time.Hour)),
 			Issuer:    "go-chat",

@@ -36,8 +36,18 @@ func (h *WSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
 		log.Println("no id")
 		return
 	}
+	username, ok := r.Context().Value("username").(string)
+	if !ok {
+		log.Println("no username")
+		return
+	}
 
-	client := ws.NewClient(userID, conn, h.hub)
+	client := ws.NewClient(ws.ClientOption{
+		UserID:   userID,
+		Username: username,
+		Conn:     conn,
+		Hub:      h.hub,
+	})
 
 	go client.ReadPump()
 	go client.WritePump()

@@ -2,6 +2,8 @@ package pages
 
 import "go-chat/cmd/web/components"
 
+var indexHandle = templ.NewOnceHandle()
+
 templ Index() {
 	@Base() {
 		<main class="flex flex-col justify-start items-center w-full h-full">
@@ -20,25 +22,32 @@ templ Index() {
 				</form>
 			</div>
 		</main>
+	}
+	@indexHandle.Once() {
 		<script>
+	function updateTimeAgo(givenTime) {
+		const now = new Date();
+		const diffInSeconds = Math.floor((now - givenTime) / 1000);
+
+		if (diffInSeconds < 60) {
+			return "just now";
+		} else if (diffInSeconds < 3600) {
+			return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+		} else if (diffInSeconds < 86400) {
+			return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+		} else {
+			return `${Math.floor(diffInSeconds / 86400)} days ago`;
+		}
+	}
 	document.addEventListener("alpine:init", () => {
 		Alpine.data("chat", (timestamp) => ({
 			givenTime: new Date(timestamp),
 			timeAgo: "",
-			updateTimeAgo() {
+			init() {
+				this.timeAgo = updateTimeAgo(this.givenTime);
 				setInterval(() => {
-					const now = new Date();
-					const diffInSeconds = Math.floor((now - this.givenTime) / 1000);
-					if (diffInSeconds < 60) {
-						this.timeAgo = "just now";
-					} else if (diffInSeconds < 3600) {
-						this.timeAgo = `${Math.floor(diffInSeconds / 60)} minutes ago`;
-					} else if (diffInSeconds < 86400) {
-						this.timeAgo = `${Math.floor(diffInSeconds / 3600)} hours ago`;
-					} else {
-						this.timeAgo = `${Math.floor(diffInSeconds / 86400)} days ago`;
-					}
-				}, 1000);
+					this.timeAgo = updateTimeAgo(this.givenTime);
+				}, 60 * 1000);
 			},
 		}))
 	})
