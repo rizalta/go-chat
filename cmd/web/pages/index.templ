@@ -4,15 +4,20 @@ import "go-chat/cmd/web/components"
 
 var indexHandle = templ.NewOnceHandle()
 
-templ Index() {
+templ Index(userID string) {
 	@Base() {
 		<main class="flex flex-col justify-start items-center w-full h-full">
 			@components.Navbar()
 			<div hx-ext="ws" ws-connect="/ws" class="w-3/5 h-5/6 bg-base-200 mt-6 flex flex-col items-center rounded-md">
 				<h1 class="text-3xl mt-3 mb-2">Chatroom</h1>
-				<div id="room" class="w-11/12 h-5/6 border-2 border-primary overflow-scroll flex flex-col-reverse rounded-md mb-2"></div>
+				<div
+					id="room"
+					class="w-11/12 h-5/6 border-2 border-primary overflow-scroll flex flex-col-reverse rounded-md mb-2 p-2"
+				></div>
 				<form ws-send class="w-11/12 flex gap-2">
+					<input hidden name="user_id" value={ userID }/>
 					<input
+						id="message"
 						type="text"
 						name="message"
 						class="input input-bordered input-primary bg-transparent w-11/12"

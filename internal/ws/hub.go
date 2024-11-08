@@ -1,12 +1,15 @@
 package ws
 
-import "sync"
+import (
+	"go-chat/internal/domain"
+	"sync"
+)
 
 type Hub struct {
 	clients    map[string]*Client
 	register   chan *Client
 	unregister chan *Client
-	broadcast  chan Message
+	broadcast  chan domain.Message
 	mutex      sync.Mutex
 }
 
@@ -15,7 +18,7 @@ func NewHub() *Hub {
 		clients:    make(map[string]*Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		broadcast:  make(chan Message),
+		broadcast:  make(chan domain.Message),
 		mutex:      sync.Mutex{},
 	}
 }

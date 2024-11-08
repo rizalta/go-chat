@@ -23,12 +23,12 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.Handle("/assets/*", fileServer)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value("userID").(string)
+		userID, ok := r.Context().Value("userID").(string)
 		if !ok {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		pages.Index().Render(r.Context(), w)
+		pages.Index(userID).Render(r.Context(), w)
 	})
 	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
 		pages.Login().Render(r.Context(), w)

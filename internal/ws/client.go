@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"go-chat/cmd/web/components"
+	"go-chat/internal/domain"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -16,7 +18,7 @@ type Client struct {
 	username string
 	conn     *websocket.Conn
 	hub      *Hub
-	send     chan Message
+	send     chan domain.Message
 }
 
 type ClientOption struct {
@@ -32,9 +34,9 @@ func NewClient(opts ClientOption) *Client {
 		username: opts.Username,
 		conn:     opts.Conn,
 		hub:      opts.Hub,
-		send:     make(chan Message),
+		send:     make(chan domain.Message),
 	}
-	opts.Hub.register <- c
+	c.hub.register <- c
 
 	return c
 }
@@ -63,7 +65,10 @@ func (c *Client) ReadPump() {
 			}
 			break
 		}
-		c.hub.broadcast <- Message{
+		if strings.TrimSpace(msg.Message) == "" {
+			continue
+		}
+		c.hub.broadcast <- domain.Message{
 			UserID:    c.userID,
 			Username:  c.username,
 			Content:   msg.Message,
@@ -85,7 +90,7 @@ func (c *Client) WritePump() {
 		fmt.Println(msg)
 
 		var buf bytes.Buffer
-		components.Message(msg.Content, msg.Username, msg.TimeStamp.Format(time.RFC3339)).
+		components.Message(msg.Content, msg.Username, msg.TimeStamp.Format(time.RFC3339), c.userID == msg.UserID).
 			Render(context.Background(), &buf)
 		err := c.conn.WriteMessage(websocket.TextMessage, buf.Bytes())
 		if err != nil {
