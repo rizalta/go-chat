@@ -38,6 +38,13 @@ func NewClient(opts ClientOption) *Client {
 	}
 	c.hub.register <- c
 
+	messages, _ := c.hub.repo.GetAllMessages(context.Background())
+	go func(messages []*domain.Message) {
+		for _, m := range messages {
+			c.send <- *m
+		}
+	}(messages)
+
 	return c
 }
 

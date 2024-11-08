@@ -1,8 +1,12 @@
 package ws
 
 import (
+	"context"
+	"go-chat/internal/database"
 	"go-chat/internal/domain"
 	"sync"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type Hub struct {
@@ -11,19 +15,22 @@ type Hub struct {
 	unregister chan *Client
 	broadcast  chan domain.Message
 	mutex      sync.Mutex
+	repo       *database.MessageRepo
 }
 
-func NewHub() *Hub {
+func NewHub(db *redis.Client) *Hub {
+	repo := database.NewMessageRepo(db)
 	return &Hub{
 		clients:    make(map[string]*Client),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		broadcast:  make(chan domain.Message),
 		mutex:      sync.Mutex{},
+		repo:       repo,
 	}
 }
 
-func (h *Hub) Run() {
+func (h *Hub) Run(ctx context.Context) {
 	for {
 		select {
 		case client := <-h.register:
@@ -47,6 +54,7 @@ func (h *Hub) Run() {
 					delete(h.clients, client.userID)
 				}
 			}
+			h.repo.AddMessage(ctx, message)
 			h.mutex.Unlock()
 		}
 	}
