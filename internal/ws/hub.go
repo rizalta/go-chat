@@ -6,8 +6,6 @@ import (
 	"go-chat/internal/domain"
 	"log"
 	"sync"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type Hub struct {
@@ -20,8 +18,7 @@ type Hub struct {
 	done       chan struct{}
 }
 
-func NewHub(db *redis.Client) *Hub {
-	repo := database.NewMessageRepo(db)
+func NewHub(repo *database.MessageRepo) *Hub {
 	return &Hub{
 		clients:    make(map[string]*Client),
 		register:   make(chan *Client),

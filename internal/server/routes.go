@@ -17,13 +17,13 @@ func (s *Server) RegisterRoutes(ctx context.Context) http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(middlewares.AuthMiddleware)
 
-	userHandler := handler.NewUserHandler(s.db)
+	userHandler := handler.NewUserHandler(s.userRepo)
 	wsHandler := handler.NewWSHandler(s.hub)
 
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
 
-	r.Get("/", serveIndex)
+	r.Get("/", s.serveIndex)
 	r.Get("/login", userHandler.ServeLogin)
 	r.Get("/signup", userHandler.ServeSignup)
 
@@ -36,13 +36,14 @@ func (s *Server) RegisterRoutes(ctx context.Context) http.Handler {
 	return r
 }
 
-func serveIndex(w http.ResponseWriter, r *http.Request) {
+func (s *Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	err := pages.Index(userID).Render(r.Context(), w)
+	messages, _ := s.messageRepo.GetMessages(r.Context(), 0)
+	err := pages.Index(userID, messages).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}

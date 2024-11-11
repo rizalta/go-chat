@@ -1,24 +1,27 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
+	"go-chat/internal/domain"
+	"time"
+)
 
-templ Message(content, username, timestamp string, isUser bool) {
-	<div id="room" hx-swap-oob="afterbegin">
-		<div
-			class={ "chat" , templ.KV("chat-start", !isUser), templ.KV("chat-end", isUser) }
-			x-data={ fmt.Sprintf("chat('%s')", timestamp) }
-		>
-			<div class="chat-header">
-				if !isUser {
-					{ username }
-				}
-			</div>
-			<div class={ "chat-bubble" , templ.KV("chat-bubble-accent", !isUser), templ.KV("chat-bubble-secondary", isUser) }>
-				{ content }
-			</div>
-			<div class="chat-footer">
-				<time class="text-xs opacity-50" x-text="timeAgo"></time>
-			</div>
+templ Message(message domain.Message, isUser bool) {
+	<div
+		class={ "chat" , templ.KV("chat-start", !isUser), templ.KV("chat-end", isUser) }
+		x-data={ fmt.Sprintf("chat('%s')",
+	message.TimeStamp.Format(time.RFC3339)) }
+	>
+		<div class="chat-header">
+			if !isUser {
+				{ message.Username }
+			}
+		</div>
+		<div class={ "chat-bubble" , templ.KV("chat-bubble-accent", !isUser), templ.KV("chat-bubble-secondary", isUser) }>
+			{ message.Content }
+		</div>
+		<div class="chat-footer">
+			<time class="text-xs opacity-50" x-text="timeAgo"></time>
 		</div>
 	</div>
 }

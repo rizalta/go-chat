@@ -10,6 +10,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const numLoad = 20
+
 type MessageRepo struct {
 	db *redis.Client
 }
@@ -36,8 +38,10 @@ func (r *MessageRepo) AddMessage(ctx context.Context, message domain.Message) er
 	return err
 }
 
-func (r *MessageRepo) GetAllMessages(ctx context.Context) ([]*domain.Message, error) {
-	keys, err := r.db.ZRange(ctx, "messages", 0, -1).Result()
+func (r *MessageRepo) GetMessages(ctx context.Context, page int64) ([]*domain.Message, error) {
+	start := page * numLoad
+	end := start + numLoad - 1
+	keys, err := r.db.ZRevRange(ctx, "messages", start, end).Result()
 	if err != nil {
 		return nil, err
 	}

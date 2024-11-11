@@ -1,0 +1,9 @@
+package components
+
+import "go-chat/internal/domain"
+
+templ Room(message domain.Message, isUser bool) {
+	<div id="room" hx-swap-oob="afterbegin">
+		@Message(message, isUser)
+	</div>
+}

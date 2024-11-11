@@ -9,17 +9,15 @@ import (
 	"go-chat/internal/utils"
 	"net/http"
 	"time"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type UserHandler struct {
 	repo *database.UserRepo
 }
 
-func NewUserHandler(db *redis.Client) *UserHandler {
+func NewUserHandler(repo *database.UserRepo) *UserHandler {
 	return &UserHandler{
-		repo: database.NewUserRepo(db),
+		repo: repo,
 	}
 }
 

@@ -61,29 +61,7 @@ func NewClient(ctx context.Context, opts ClientOption) *Client {
 
 	c.hub.register <- c
 
-	go c.loadHistoricalMessages(ctx)
-
 	return c
-}
-
-func (c *Client) loadHistoricalMessages(ctx context.Context) {
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	messages, err := c.hub.repo.GetAllMessages(ctx)
-	if err != nil {
-		log.Printf("Error loading historical messages, %v", err)
-		return
-	}
-
-	for _, m := range messages {
-		select {
-		case c.send <- *m:
-		default:
-			log.Printf("Failed to send historical message, channel full")
-			return
-		}
-	}
 }
 
 type WSMessage struct {
@@ -149,12 +127,12 @@ func (c *Client) WritePump(ctx context.Context) {
 				return
 			}
 			buf := &bytes.Buffer{}
-			err := components.Message(msg.Content, msg.Username, msg.TimeStamp.Format(time.RFC3339), c.userID == msg.UserID).
+			err := components.Room(msg, msg.UserID == c.userID).
 				Render(ctx, buf)
 			if err != nil {
 				log.Printf("error rendering message: %v", err)
 			}
-			err = c.conn.WriteMessage(websocket.TextMessage, buf.Bytes())
+			err = c.writeMessage(websocket.TextMessage, buf.Bytes())
 			if err != nil {
 				log.Printf("error writing message from user %s: %v", c.userID, err)
 				return

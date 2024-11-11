@@ -1,10 +1,13 @@
 package pages
 
-import "go-chat/cmd/web/components"
+import (
+	"go-chat/cmd/web/components"
+	"go-chat/internal/domain"
+)
 
 var indexHandle = templ.NewOnceHandle()
 
-templ Index(userID string) {
+templ Index(userID string, messages []*domain.Message) {
 	@Base() {
 		<main class="flex flex-col justify-start items-center w-full h-full">
 			@components.Navbar()
@@ -13,7 +16,11 @@ templ Index(userID string) {
 				<div
 					id="room"
 					class="w-11/12 h-5/6 border-2 border-primary overflow-scroll flex flex-col-reverse rounded-md mb-2 p-2"
-				></div>
+				>
+					for _, message := range messages {
+						@components.Message(*message, message.UserID == userID)
+					}
+				</div>
 				<form ws-send class="w-11/12 flex gap-2">
 					<input hidden name="user_id" value={ userID }/>
 					<input
