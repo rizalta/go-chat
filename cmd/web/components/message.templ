@@ -21,14 +21,4 @@ templ Message(content, username, timestamp string, isUser bool) {
 			</div>
 		</div>
 	</div>
-	if isUser {
-		<input
-			id="message"
-			type="text"
-			name="message"
-			class="input input-bordered input-primary bg-transparent w-11/12"
-			placeholder="Type here"
-			hx-swap-oob="true"
-		/>
-	}
 }
