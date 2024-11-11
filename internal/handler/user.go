@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-chat/cmd/web/components"
+	"go-chat/cmd/web/pages"
 	"go-chat/internal/database"
 	"go-chat/internal/utils"
 	"net/http"
@@ -99,4 +100,28 @@ func (h *UserHandler) Signout(w http.ResponseWriter, r *http.Request) {
 
 func sendErroNotification(ctx context.Context, w http.ResponseWriter, msg string) {
 	components.ErrorNotification(msg).Render(ctx, w)
+}
+
+func (h *UserHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value("userID").(string)
+	if ok {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	err := pages.Login().Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
+}
+
+func (h *UserHandler) ServeSignup(w http.ResponseWriter, r *http.Request) {
+	_, ok := r.Context().Value("userID").(string)
+	if ok {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	err := pages.Signup().Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
 }

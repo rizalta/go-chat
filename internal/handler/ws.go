@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"go-chat/internal/ws"
 	"log"
 	"net/http"
@@ -24,31 +25,33 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func (h *WSHandler) HandleWS(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+func (h *WSHandler) HandleWS(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
-	userID, ok := r.Context().Value("userID").(string)
-	if !ok {
-		log.Println("no id")
-		return
-	}
-	username, ok := r.Context().Value("username").(string)
-	if !ok {
-		log.Println("no username")
-		return
-	}
+		userID, ok := r.Context().Value("userID").(string)
+		if !ok {
+			log.Println("no id")
+			return
+		}
+		username, ok := r.Context().Value("username").(string)
+		if !ok {
+			log.Println("no username")
+			return
+		}
 
-	client := ws.NewClient(ws.ClientOption{
-		UserID:   userID,
-		Username: username,
-		Conn:     conn,
-		Hub:      h.hub,
-	})
+		client := ws.NewClient(ctx, ws.ClientOption{
+			UserID:   userID,
+			Username: username,
+			Conn:     conn,
+			Hub:      h.hub,
+		})
 
-	go client.ReadPump()
-	go client.WritePump()
+		go client.ReadPump()
+		go client.WritePump(ctx)
+	}
 }

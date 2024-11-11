@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"go-chat/internal/ws"
 	"net/http"
@@ -18,7 +19,7 @@ type Server struct {
 	db *redis.Client
 }
 
-func NewServer(db *redis.Client, hub *ws.Hub) *http.Server {
+func NewServer(ctx context.Context, db *redis.Client, hub *ws.Hub) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
@@ -27,10 +28,9 @@ func NewServer(db *redis.Client, hub *ws.Hub) *http.Server {
 		db: db,
 	}
 
-	// Declare Server config
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(),
+		Handler:      NewServer.RegisterRoutes(ctx),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

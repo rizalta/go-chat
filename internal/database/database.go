@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -16,10 +17,11 @@ var (
 	database = os.Getenv("DB_DATABASE")
 )
 
-func New() *redis.Client {
+func New(ctx context.Context) (*redis.Client, error) {
 	num, err := strconv.Atoi(database)
 	if err != nil {
-		log.Fatalf(fmt.Sprintf("database incorrect %v", err))
+		log.Printf(fmt.Sprintf("database incorrect %v", err))
+		return nil, err
 	}
 
 	fullAddress := fmt.Sprintf("%s:%s", address, port)
@@ -30,5 +32,11 @@ func New() *redis.Client {
 		DB:       num,
 	})
 
-	return rdb
+	err = rdb.Ping(ctx).Err()
+	if err != nil {
+		log.Printf("database not connected: %v", err)
+		return nil, err
+	}
+
+	return rdb, nil
 }

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"go-chat/cmd/web"
 	"go-chat/cmd/web/pages"
 	"go-chat/internal/handler"
@@ -11,7 +12,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func (s *Server) RegisterRoutes() http.Handler {
+func (s *Server) RegisterRoutes(ctx context.Context) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middlewares.AuthMiddleware)
@@ -22,26 +23,27 @@ func (s *Server) RegisterRoutes() http.Handler {
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value("userID").(string)
-		if !ok {
-			http.Redirect(w, r, "/login", http.StatusFound)
-			return
-		}
-		pages.Index(userID).Render(r.Context(), w)
-	})
-	r.Get("/login", func(w http.ResponseWriter, r *http.Request) {
-		pages.Login().Render(r.Context(), w)
-	})
-	r.Get("/signup", func(w http.ResponseWriter, r *http.Request) {
-		pages.Signup().Render(r.Context(), w)
-	})
+	r.Get("/", serveIndex)
+	r.Get("/login", userHandler.ServeLogin)
+	r.Get("/signup", userHandler.ServeSignup)
 
 	r.Post("/login", userHandler.Login)
 	r.Post("/signup", userHandler.Signup)
 	r.Get("/signout", userHandler.Signout)
 
-	r.Get("/ws", wsHandler.HandleWS)
+	r.Get("/ws", wsHandler.HandleWS(ctx))
 
 	return r
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	err := pages.Index(userID).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+	}
 }
