@@ -38,12 +38,20 @@ func (r *MessageRepo) AddMessage(ctx context.Context, message domain.Message) er
 	return err
 }
 
-func (r *MessageRepo) GetMessages(ctx context.Context, page int64) ([]*domain.Message, error) {
+func (r *MessageRepo) GetMessages(
+	ctx context.Context,
+	page int64,
+) ([]*domain.Message, bool, error) {
 	start := page * numLoad
 	end := start + numLoad - 1
+	total, err := r.db.ZCard(ctx, "messages").Result()
+	if err != nil {
+		return nil, false, err
+	}
+
 	keys, err := r.db.ZRevRange(ctx, "messages", start, end).Result()
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var messages []*domain.Message
@@ -60,5 +68,5 @@ func (r *MessageRepo) GetMessages(ctx context.Context, page int64) ([]*domain.Me
 		messages = append(messages, &message)
 	}
 
-	return messages, nil
+	return messages, end < total-1, nil
 }

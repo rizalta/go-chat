@@ -20,13 +20,12 @@ type Server struct {
 }
 
 type ServerParams struct {
-	Ctx         context.Context
 	UserRepo    *database.UserRepo
 	MessageRepo *database.MessageRepo
 	Hub         *ws.Hub
 }
 
-func NewServer(params ServerParams) *http.Server {
+func NewServer(ctx context.Context, params ServerParams) *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port:        port,
@@ -37,7 +36,7 @@ func NewServer(params ServerParams) *http.Server {
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", NewServer.port),
-		Handler:      NewServer.RegisterRoutes(params.Ctx),
+		Handler:      NewServer.RegisterRoutes(ctx),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

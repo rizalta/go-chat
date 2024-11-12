@@ -1,0 +1,20 @@
+package components
+
+import (
+	"fmt"
+	"go-chat/internal/domain"
+)
+
+templ LoadMessages(messages []*domain.Message, userID string, page int, hasNext bool) {
+	for _, message := range messages {
+		@Message(*message, userID == message.UserID)
+	}
+	if hasNext {
+		<div class="divider cursor-pointer divider-accent" hx-get={ fmt.Sprintf("/messages/%d", page+1) } hx-swap="outerHTML">
+			Load older
+			messages
+		</div>
+	} else {
+		<div class="divider pt-2"></div>
+	}
+}

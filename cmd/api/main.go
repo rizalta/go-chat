@@ -28,12 +28,12 @@ func main() {
 	hub := ws.NewHub(messageRepo)
 	go hub.Run(ctx)
 
-	server := server.NewServer(server.ServerParams{
-		Ctx:         ctx,
+	server := server.NewServer(ctx, server.ServerParams{
 		UserRepo:    userRepo,
 		MessageRepo: messageRepo,
 		Hub:         hub,
 	})
+
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)

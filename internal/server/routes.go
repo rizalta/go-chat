@@ -9,7 +9,6 @@ import (
 	"go-chat/internal/middlewares"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -36,7 +35,7 @@ func (s *Server) RegisterRoutes(ctx context.Context) http.Handler {
 
 	r.Get("/ws", wsHandler.HandleWS(ctx))
 
-	r.Get("/messages/{page}", s.messages(ctx))
+	r.Get("/messages/{page}", s.loadMessages(ctx))
 
 	return r
 }
@@ -47,27 +46,21 @@ func (s *Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	messages, _ := s.messageRepo.GetMessages(r.Context(), 0)
-	err := pages.Index(userID, messages).Render(r.Context(), w)
+	err := pages.Index(userID).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 	}
 }
 
-func (s *Server) messages(ctx context.Context) http.HandlerFunc {
+func (s *Server) loadMessages(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID := r.Context().Value("userID").(string)
 		if r.Header.Get("HX-Request") != "true" {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 		page, _ := strconv.Atoi(r.PathValue("page"))
-		messages, _ := s.messageRepo.GetMessages(ctx, int64(page))
-		var mm strings.Builder
-		for _, message := range messages {
-			var m strings.Builder
-			components.Message(*message, true).Render(ctx, &m)
-			mm.WriteString(m.String())
-		}
-		w.Write([]byte(mm.String()))
+		messages, hasNext, _ := s.messageRepo.GetMessages(ctx, int64(page))
+		components.LoadMessages(messages, userID, page, hasNext).Render(ctx, w)
 	}
 }
