@@ -20,6 +20,9 @@ templ Index(userID string, messages []*domain.Message) {
 					for _, message := range messages {
 						@components.Message(*message, message.UserID == userID)
 					}
+					<div class="divider cursor-pointer" hx-get="/messages/1" hx-swap="outerHTML">
+						Load
+					</div>
 				</div>
 				<form ws-send class="w-11/12 flex gap-2">
 					<input hidden name="user_id" value={ userID }/>
